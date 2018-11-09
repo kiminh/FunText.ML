@@ -1,3 +1,0 @@
-# FunText.ML
-
-jupyter notebookdddd 
