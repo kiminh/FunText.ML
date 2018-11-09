@@ -1,0 +1,24 @@
+data:
+  src_suffix: ".src"
+  tgt_suffix: ".tgt"
+  data_prefix: "../data/novel/data"
+  predict_prefix: "../data/novel/predict"
+  embed_file: "../resource/novel_embedding_64.txt"
+  out_dir: "../experiment/novel/"
+  
+model:
+  encoder_type: 'bi' # uni | bi
+  num_units: 128
+  num_layers: 4
+  dropout: 0.2
+  embed_dim: 64
+  max_gradient_norm: 5.0
+  batch_size: 128
+
+train:
+  learning_rate: 0.01
+  num_epochs: 1
+
+infer:
+  beam_width: 10
+  length_penalty_weight: 1.0
