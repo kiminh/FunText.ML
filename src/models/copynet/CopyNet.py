@@ -8,7 +8,7 @@ from models.seq2seq.Seq2SeqHelper import *
 
 class CopyNet():
     def __init__(self):
-        Config('configs/novel.yml')
+        Config('configs/letter.yml')
 
     def train(self):
         dl = DataLoader()

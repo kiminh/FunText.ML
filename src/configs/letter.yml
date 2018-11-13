@@ -18,7 +18,7 @@ model:
 
 train:
   learning_rate: 0.01
-  num_epochs: 1
+  num_epochs: 10
 
 infer:
   infer_mode: 'greedy' # beam_search
