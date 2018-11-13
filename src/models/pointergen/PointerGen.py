@@ -2,11 +2,11 @@ import tensorflow as tf
 import numpy as np
 
 from hbconfig import Config
-from models.pointernet.PointerNetDataLoader import DataLoader
-from models.pointernet.PointerNetGenerator import Generator
+from models.pointergen.PointerNetDataLoader import DataLoader
+from models.pointergen.PointerNetGenerator import Generator
 from models.seq2seq.Seq2SeqHelper import *
 
-class PointerNet():
+class PointerGen():
     def __init__(self):
         Config('configs/letter.yml')
 
