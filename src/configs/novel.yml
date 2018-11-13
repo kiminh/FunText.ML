@@ -14,10 +14,11 @@ model:
   embed_dim: 64
   max_gradient_norm: 5.0
   batch_size: 128
+  coverage: True
 
 train:
   learning_rate: 0.01
-  num_epochs: 1
+  num_epochs: 10
 
 infer:
   beam_width: 10

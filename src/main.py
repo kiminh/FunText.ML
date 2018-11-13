@@ -5,10 +5,12 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 from colorama import Fore
 from models.seq2seq.Seq2Seq import Seq2Seq
+from models.pointernet.PointerNet import PointerNet
 
 def set_model(model_name):
     models = dict()
     models['seq2seq'] = Seq2Seq
+    models['pointernet'] = PointerNet
     try:
         Model = models[model_name.lower()]
         model = Model()
