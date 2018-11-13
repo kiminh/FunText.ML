@@ -19,3 +19,4 @@
 
 代码：
 * [https://github.com/tensorflow/nmt](https://github.com/tensorflow/nmt)
+* [finch](https://nbviewer.jupyter.org/github/zhedongzheng/finch/blob/master/src_nlp/tensorflow/tf-estimator/seq2seq_ultimate_test.ipynb)

@@ -20,7 +20,7 @@ class DataLoader(Seq2SeqDataLoader):
 
         dataset = tf.data.Dataset.from_generator(
             lambda: self._next_batch(src, tgt),
-            (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32),
+            (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32),
             (tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None]), tf.TensorShape([None])))
         dataset = dataset.map(_parse)
         iterator = dataset.make_one_shot_iterator()

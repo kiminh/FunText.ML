@@ -28,3 +28,15 @@ class CopyNet():
         s = g.predict_fn(text, estimator)
         with open(Config.data.predict_prefix+Config.data.tgt_suffix, "w", encoding="utf-8") as f:
             f.write(s)
+
+    def predict(self):
+        dl = DataLoader()
+        g = Generator(dl)
+        
+        estimator = tf.estimator.Estimator(g.model_fn, model_dir=Config.data.out_dir+"checkpoint")
+
+        with open(Config.data.predict_prefix+Config.data.src_suffix, 'r', encoding='utf-8') as f:
+            text = f.read()            
+        s = g.predict_fn(text, estimator)
+        with open(Config.data.predict_prefix+Config.data.tgt_suffix, "w", encoding="utf-8") as f:
+            f.write(s)

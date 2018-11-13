@@ -2,14 +2,14 @@ import tensorflow as tf
 import numpy as np
 
 from hbconfig import Config
-from models.seq2seq.Seq2SeqDataLoader import DataLoader
-from models.seq2seq.Seq2SeqGenerator import Generator
+from models.pointernet.PointerNetDataLoader import DataLoader
+from models.pointernet.PointerNetGenerator import Generator
 from models.seq2seq.Seq2SeqHelper import *
 
-class Seq2Seq():
+class PointerNet():
     def __init__(self):
-        Config('configs/novel.yml')
-        
+        Config('configs/letter.yml')
+
     def train(self):
         dl = DataLoader()
         g = Generator(dl)
@@ -28,7 +28,7 @@ class Seq2Seq():
         s = g.predict_fn(text, estimator)
         with open(Config.data.predict_prefix+Config.data.tgt_suffix, "w", encoding="utf-8") as f:
             f.write(s)
-        
+
     def predict(self):
         dl = DataLoader()
         g = Generator(dl)
