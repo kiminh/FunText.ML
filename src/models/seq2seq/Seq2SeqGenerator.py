@@ -170,36 +170,58 @@ class Generator():
         return logits, predictions
     
     def _build_decoder_infer(self, cell, initial_state):
-        decoder = tf.contrib.seq2seq.BeamSearchDecoder(
-            cell = cell,
-            embedding = self._embedding_decoder,
-            start_tokens = tf.tile(tf.constant([SOS_ID], tf.int32), [self._batch_size]),
-            end_token = EOS_ID,
-            initial_state = initial_state,
-            beam_width = Config.infer.beam_width,            
-            length_penalty_weight=Config.infer.length_penalty_weight,
-            output_layer = self._output_layer)
+        start_tokens = tf.fill([self._batch_size], SOS_ID)
+        end_token = EOS_ID
+
+        if Config.infer.infer_mode == "beam_search":
+            decoder = tf.contrib.seq2seq.BeamSearchDecoder(
+                cell=cell,
+                embedding=self._embedding_decoder,
+                start_tokens=start_tokens,
+                end_token=end_token,
+                initial_state=initial_state,
+                beam_width=Config.infer.beam_width,
+                output_layer=self._output_layer,
+                length_penalty_weight=Config.infer._length_penalty_weight)
+        elif Config.infer.infer_mode == "greedy":
+            helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
+                embedding=self._embedding_decoder, 
+                start_tokens=start_tokens, 
+                end_token=end_token)
+        else:
+            raise ValueError("Unknown infer_mode '%s'", Config.infer.infer_mode)
+        
+        if Config.infer.infer_mode != "beam_search":
+            decoder = tf.contrib.seq2seq.BasicDecoder(
+                cell, 
+                helper, 
+                initial_state,
+                output_layer=self._output_layer)
 
         decoder_output, _, _ = tf.contrib.seq2seq.dynamic_decode(
             decoder = decoder,            
             output_time_major=False,
             impute_finished=False,
             maximum_iterations=self._max_target_sequence_length)
-        
-        logits = tf.no_op()
-        predictions = decoder_output.predicted_ids[:, :, 0]
 
-        return logits, predictions
+        if Config.infer.infer_mode == "beam_search":
+            logits = tf.no_op()
+            sample_id = decoder_output.predicted_ids[:, :, 0]
+        else:
+            logits = decoder_output.rnn_output
+            sample_id = decoder_output.sample_id
+
+        return logits, sample_id
 
     def _build_decoder_cell(self, encoder_state, encoder_outputs):
-        if self._mode != tf.estimator.ModeKeys.PREDICT:
-            memory = encoder_outputs
-            memory_sequence_length = self._source_sequence_length
-            cell_state = encoder_state
-        else:
+        if self._mode == tf.estimator.ModeKeys.PREDICT and Config.infer.infer_mode == "beam_search":
             memory = tf.contrib.seq2seq.tile_batch(encoder_outputs, Config.infer.beam_width)
             memory_sequence_length = tf.contrib.seq2seq.tile_batch(self._source_sequence_length, Config.infer.beam_width)
             cell_state = tf.contrib.seq2seq.tile_batch(encoder_state, Config.infer.beam_width)
+        else:
+            memory = encoder_outputs
+            memory_sequence_length = self._source_sequence_length
+            cell_state = encoder_state
 
         attention = tf.contrib.seq2seq.LuongAttention(
             num_units = Config.model.num_units,
@@ -212,35 +234,13 @@ class Generator():
             attention_mechanism = attention,
             attention_layer_size = Config.model.num_units)
 
-        if self._mode != tf.estimator.ModeKeys.PREDICT:
-            initial_state = cell.zero_state(self._batch_size, tf.float32).clone(cell_state=cell_state)
-        else:
+        if self._mode == tf.estimator.ModeKeys.PREDICT and Config.infer.infer_mode == "beam_search":
             initial_state = cell.zero_state(self._batch_size * Config.infer.beam_width, tf.float32).clone(
                         cell_state=cell_state)
+        else:
+            initial_state = cell.zero_state(self._batch_size, tf.float32).clone(cell_state=cell_state)
         
         return cell, initial_state
-
-    # def _build_loss(self, logits):
-    #     logits_length = tf.shape(logits)[1]
-    #     label_length = self._max_target_sequence_length
-    #     pad_size = label_length - logits_length
-    #     logits = tf.pad(logits, [[0, 0], [0, pad_size], [0, 0]])
-
-    #     crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
-    #         labels=self._target_output, logits=logits)
-    #     target_weights = tf.sequence_mask(
-    #         self._target_sequence_length, 
-    #         label_length,
-    #         dtype=logits.dtype)
-    #     loss = (tf.reduce_sum(crossent * target_weights) / tf.to_float(self._batch_size))
-    #     return loss
-
-    # def _build_optimization(self):
-    #     optimizer = tf.train.AdamOptimizer(self._learning_rate)
-    #     train_op = optimizer.apply_gradients(
-    #         clip_grads(self.loss),
-    #         global_step=tf.train.get_global_step())
-    #     return train_op
     
     def _build_loss(self, logits):
         weight_masks = tf.sequence_mask(

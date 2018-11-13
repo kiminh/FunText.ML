@@ -8,7 +8,6 @@ from models.seq2seq.Seq2SeqHelper import *
 
 class PointerNet():
     def __init__(self):
-        tf.logging.set_verbosity(tf.logging.INFO)
         Config('configs/letter.yml')
 
     def train(self):
