@@ -6,12 +6,12 @@ tf.logging.set_verbosity(tf.logging.INFO)
 from colorama import Fore
 from models.seq2seq.Seq2Seq import Seq2Seq
 from models.copynet.CopyNet import CopyNet
-from models.pointergen.PointerGen import PointerGen
+from models.pointer_generator.PointerGenerator import PointerGenerator
 
 def set_model(model_name):
     models = dict()
     models['seq2seq'] = Seq2Seq
-    models['pointergen'] = PointerGen
+    models['pointer_generator'] = PointerGenerator
     models['copynet'] = CopyNet
     try:
         Model = models[model_name.lower()]

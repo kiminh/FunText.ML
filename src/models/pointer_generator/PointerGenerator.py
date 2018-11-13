@@ -2,8 +2,8 @@ import tensorflow as tf
 import numpy as np
 
 from hbconfig import Config
-from models.pointergen.PointerNetDataLoader import DataLoader
-from models.pointergen.PointerNetGenerator import Generator
+from models.pointer_generator.PointerGeneratorDataLoader import DataLoader
+from models.pointer_generator.PointerGeneratorGenerator import Generator
 from models.seq2seq.Seq2SeqHelper import *
 
 class PointerGen():

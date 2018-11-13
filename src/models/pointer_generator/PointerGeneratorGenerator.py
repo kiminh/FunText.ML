@@ -5,7 +5,7 @@ import nltk
 from hbconfig import Config
 from models.seq2seq.Seq2SeqGenerator import Generator as Seq2SeqGenerator
 from models.seq2seq.Seq2SeqHelper import *
-from models.pointergen.PointerGenHelper import PointerGeneratorDecoder, PointerGeneratorGreedyEmbeddingHelper, PointerGeneratorBahdanauAttention,PointerGeneratorAttentionWrapper
+from models.pointer_generator.PointerGeneratorHelper import PointerGeneratorDecoder, PointerGeneratorGreedyEmbeddingHelper, PointerGeneratorBahdanauAttention,PointerGeneratorAttentionWrapper
 
 class Generator(Seq2SeqGenerator):
     def __init__(self, dl):
