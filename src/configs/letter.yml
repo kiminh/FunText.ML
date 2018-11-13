@@ -15,6 +15,7 @@ model:
   max_gradient_norm: 5.0
   batch_size: 128
   coverage: True
+  max_len: 15
 
 train:
   learning_rate: 0.01

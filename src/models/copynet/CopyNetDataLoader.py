@@ -8,24 +8,53 @@ from models.seq2seq.Seq2SeqHelper import *
 
 class DataLoader(Seq2SeqDataLoader):
     def __init__(self):
-        super(DataLoader,self).__init__()
+        super(DataLoader,self).__init__() 
             
     def make_batch(self, src, tgt):
-        def _parse(src, tgt_in, tgt_out, src_len, tgt_len):
+        def _parse(src, tgt_in, tgt_out, src_len, tgt_len, src_max_oov):
             return {"source": src, 
-                    "source_sequence_length": src_len}, {
+                    "source_sequence_length": src_len,
+                    "source_max_oov":src_max_oov}, {
                     "target_input": tgt_in,
                     "target_output": tgt_out,
                     "target_sequence_length": tgt_len}
 
         dataset = tf.data.Dataset.from_generator(
             lambda: self._next_batch(src, tgt),
-            (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32),
-            (tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None]), tf.TensorShape([None])))
+            (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32),
+            (tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None]), tf.TensorShape([None]), tf.TensorShape(None)))
         dataset = dataset.map(_parse)
         iterator = dataset.make_one_shot_iterator()
         features, labels = iterator.get_next()
         return features, labels
+
+    def predict_input_fn(self, xs):
+        def infer_inps(str_li):
+            batch_src = []
+            batch_src_oovs = []
+            batch_src_len = []
+            for s in str_li:
+                single_src,single_src_oovs,single_src_len = self.source2idx(s.strip())
+                batch_src.append(single_src)
+                batch_src_oovs.append(single_src_oovs)
+                batch_src_len.append(single_src_len)
+            pad_src = self._pad_sent_batch(batch_src)
+            max_oovs = max(len(x) for x in batch_src_oovs)
+            yield pad_src,batch_src_len,max_oovs
+
+        def _parse(src, src_len, src_max_oov):
+            return {"source": src, 
+                    "source_sequence_length": src_len,
+                    "source_max_oov":src_max_oov}
+
+        dataset = tf.data.Dataset.from_generator(
+            lambda: infer_inps(xs),
+            (tf.int32, tf.int32, tf.int32),
+            (tf.TensorShape([None, None]), tf.TensorShape([None]), tf.TensorShape(None)))
+        dataset = dataset.map(_parse)
+        iterator = dataset.make_one_shot_iterator()
+        features = iterator.get_next()
+        return features
 
     def _next_batch(self, src, tgt):
         batch_src = []
@@ -48,7 +77,8 @@ class DataLoader(Seq2SeqDataLoader):
                 pad_src = self._pad_sent_batch(batch_src)
                 pad_tgt_in = self._pad_sent_batch(batch_tgt_in)
                 pad_tgt_out = self._pad_sent_batch(batch_tgt_out)
-                yield pad_src,pad_tgt_in,pad_tgt_out,batch_src_len,batch_tgt_len
+                max_oovs = max(len(x) for x in batch_src_oovs)
+                yield pad_src,pad_tgt_in,pad_tgt_out,batch_src_len,batch_tgt_len,max_oovs
                 batch_src = []
                 batch_src_oovs = []
                 batch_src_len = []

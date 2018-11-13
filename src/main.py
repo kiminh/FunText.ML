@@ -7,11 +7,13 @@ from colorama import Fore
 from models.seq2seq.Seq2Seq import Seq2Seq
 from models.copynet.CopyNet import CopyNet
 from models.pointer_generator.PointerGenerator import PointerGenerator
+from models.pointernet.PointerNet import PointerNet
 
 def set_model(model_name):
     models = dict()
     models['seq2seq'] = Seq2Seq
     models['pointer_generator'] = PointerGenerator
+    models['pointernet'] = PointerNet
     models['copynet'] = CopyNet
     try:
         Model = models[model_name.lower()]
