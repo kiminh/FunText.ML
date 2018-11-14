@@ -22,6 +22,6 @@ train:
   num_epochs: 1
 
 infer:
-  infer_mode: 'greedy' # beam_search
+  infer_mode: 'greedy' # greedy beam_search
   beam_width: 10
   length_penalty_weight: 1.0

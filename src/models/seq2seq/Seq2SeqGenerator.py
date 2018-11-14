@@ -182,7 +182,7 @@ class Generator():
                 initial_state=initial_state,
                 beam_width=Config.infer.beam_width,
                 output_layer=self._output_layer,
-                length_penalty_weight=Config.infer._length_penalty_weight)
+                length_penalty_weight=Config.infer.length_penalty_weight)
         elif Config.infer.infer_mode == "greedy":
             helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
                 embedding=self._embedding_decoder, 
@@ -229,10 +229,12 @@ class Generator():
             memory_sequence_length = memory_sequence_length,
             scale=True)
         
+         alignment_history = (self._mode == tf.contrib.learn.ModeKeys.PREDICT and Config.infer.infer_mode != "beam_search")
         cell = tf.contrib.seq2seq.AttentionWrapper(
             cell = create_rnn_cell(self._num_layers,self._mode),
             attention_mechanism = attention,
-            attention_layer_size = Config.model.num_units)
+            attention_layer_size = Config.model.num_units,            
+            alignment_history=alignment_history)
 
         if self._mode == tf.estimator.ModeKeys.PREDICT and Config.infer.infer_mode == "beam_search":
             initial_state = cell.zero_state(self._batch_size * Config.infer.beam_width, tf.float32).clone(
