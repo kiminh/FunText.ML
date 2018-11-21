@@ -3,7 +3,7 @@ import numpy as np
 import nltk
 
 from hbconfig import Config
-from models.seq2seq.Seq2SeqHelper import *
+from utils.Seq2SeqHelper import *
 
 class Generator():
     def __init__(self, dl):
@@ -16,13 +16,13 @@ class Generator():
         self._mode = mode   
         self.loss, self.train_op,  self.metrics, self.predictions = None, None, None, None
 
-        logits, self.predictions = self._build_graph(features, labels, mode)
+        self._build_graph(features, labels, mode)
         
         if mode != tf.estimator.ModeKeys.PREDICT:
-            self.loss = self._build_loss(logits)
+            self.loss = self._build_loss()
         
         if mode == tf.estimator.ModeKeys.TRAIN:
-            self.train_op = self._build_optimization()
+            self.train_op = self._build_optimizer()
         
         if mode == tf.estimator.ModeKeys.EVAL:
             self.metrics = self._build_metric()
@@ -32,18 +32,25 @@ class Generator():
             loss=self.loss,
             train_op=self.train_op,
             eval_metric_ops=self.metrics,
-            predictions=self.predictions)
+            predictions=self.predictions)       
     
     def predict_fn(self, text, estimator):
-        res = []      
+        res = []
         xs = text.split('\n')
-        preds = list(estimator.predict(self.dl.predict_input_fn(xs)))
-        for x, pred in zip(xs, preds):
-            pred_str = ' '.join(self.dl.id_to_text(pred))
-            print('IN: {}'.format(x))
+        predict_input_fn = lambda: self.dl.get_infer_batch(xs)
+        preds =list(estimator.predict(predict_input_fn))
+        for ii in range(len(xs)):
+            pred_str_list = []
+            for word_id in preds[ii]:
+                if(word_id==EOS_ID):
+                    break
+                pred_str_list.append(self.dl.idx2word[word_id])       
+            pred_str = ' '.join(pred_str_list)
+            x = xs[ii]
+            print('IN : {}'.format(x))
             print('OUT: {}'.format(pred_str))
             res.append(pred_str)
-
+            
         return '\n'.join(res)
         
     def _build_graph(self, features, labels, mode):
@@ -52,8 +59,7 @@ class Generator():
         self._init_embeddings()
         self._build_projection()
         encoder_outputs, encoder_state = self._build_encoder()
-        logits, sample_id = self._build_decoder(encoder_outputs, encoder_state)
-        return logits, sample_id
+        self._build_decoder(encoder_outputs, encoder_state)
         
     def _init_placeholder(self, features, labels):
         self._source = features['source']
@@ -139,9 +145,9 @@ class Generator():
             cell, initial_state = self._build_decoder_cell(encoder_state, encoder_outputs)
 
             if self._mode != tf.estimator.ModeKeys.PREDICT:
-                return self._build_decoder_train_eval(cell, initial_state)
+                self.logits, self.predictions = self._build_decoder_train_eval(cell, initial_state)
             else:
-                return self._build_decoder_infer(cell, initial_state)
+                self.logits, self.predictions = self._build_decoder_infer(cell, initial_state)
     
     def _build_decoder_train_eval(self, cell, initial_state):
         helper = tf.contrib.seq2seq.TrainingHelper(
@@ -229,7 +235,7 @@ class Generator():
             memory_sequence_length = memory_sequence_length,
             scale=True)
         
-         alignment_history = (self._mode == tf.contrib.learn.ModeKeys.PREDICT and Config.infer.infer_mode != "beam_search")
+        alignment_history = (self._mode == tf.estimator.ModeKeys.PREDICT and Config.infer.infer_mode != "beam_search")
         cell = tf.contrib.seq2seq.AttentionWrapper(
             cell = create_rnn_cell(self._num_layers,self._mode),
             attention_mechanism = attention,
@@ -244,20 +250,20 @@ class Generator():
         
         return cell, initial_state
     
-    def _build_loss(self, logits):
+    def _build_loss(self):
         weight_masks = tf.sequence_mask(
             self._target_sequence_length, 
             self._max_target_sequence_length,
-            dtype=logits.dtype)
+            dtype=self.logits.dtype)
 
         loss = tf.contrib.seq2seq.sequence_loss(
-                logits=logits,
+                logits=self.logits,
                 targets=self._target_output,
                 weights=weight_masks,
                 name="loss")
         return loss
 
-    def _build_optimization(self):
+    def _build_optimizer(self):
         train_op = tf.contrib.layers.optimize_loss(
             self.loss, 
             tf.train.get_global_step(),

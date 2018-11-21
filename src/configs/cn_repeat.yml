@@ -1,0 +1,26 @@
+data:
+  src_suffix: ".src"
+  tgt_suffix: ".tgt"
+  data_prefix: "../data/cn_repeat/data"
+  predict_prefix: "../data/cn_repeat/predict"
+  embed_file: "../resource/cn_repeat_embedding_64.txt"
+  out_dir: "../experiment/cn_repeat/"
+  
+model:
+  encoder_type: 'bi' # uni | bi
+  num_units: 128
+  num_layers: 4
+  dropout: 0.2
+  embed_dim: 64
+  max_gradient_norm: 5.0
+  batch_size: 128
+  coverage: True
+
+train:
+  learning_rate: 0.01
+  num_epochs: 10
+
+infer:
+  infer_mode: 'greedy' # beam_search
+  beam_width: 10
+  length_penalty_weight: 1.0

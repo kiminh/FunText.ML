@@ -4,16 +4,12 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.INFO)
 
 from colorama import Fore
-from models.seq2seq.Seq2Seq import Seq2Seq
+from models.attention.Attention import Attention
 from models.copynet.CopyNet import CopyNet
-from models.pointer_generator.PointerGenerator import PointerGenerator
-from models.pointernet.PointerNet import PointerNet
 
 def set_model(model_name):
     models = dict()
-    models['seq2seq'] = Seq2Seq
-    models['pointer_generator'] = PointerGenerator
-    models['pointernet'] = PointerNet
+    models['attention'] = Attention
     models['copynet'] = CopyNet
     try:
         Model = models[model_name.lower()]
@@ -25,19 +21,20 @@ def set_model(model_name):
 
 def parse_cmd(argv):
     try:
-        opts, args = getopt.getopt(argv, "hg:p")
+        opts, args = getopt.getopt(argv, "hg:pt")
         opt_arg = dict(opts)
         if '-h' in opt_arg.keys():
             print('usage: python main.py -g <model_type>')
             print('       python main.py -g <model_type> -p')
             sys.exit(0)
         if not '-g' in opt_arg.keys():
-            print('unspecified Model type, use Seq2Seq training only...')
-            model = set_model('seq2seq')
+            model = set_model('attention')
         else:
             model = set_model(opt_arg['-g'])
         if '-p' in opt_arg.keys():
             model.predict()
+        elif '-t' in opt_arg.keys():
+            model.test()
         else:
             model.train()
     except getopt.GetoptError:

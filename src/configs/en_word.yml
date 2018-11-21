@@ -1,10 +1,10 @@
 data:
   src_suffix: ".src"
   tgt_suffix: ".tgt"
-  data_prefix: "../data/novel/data"
-  predict_prefix: "../data/novel/predict"
-  embed_file: "../resource/novel_embedding_64.txt"
-  out_dir: "../experiment/novel/"
+  data_prefix: "../data/en_word/data"
+  predict_prefix: "../data/en_word/predict"
+  embed_file: "../resource/en_letter_embedding_64.txt"
+  out_dir: "../experiment/en_word/"
   
 model:
   encoder_type: 'bi' # uni | bi
@@ -15,12 +15,13 @@ model:
   max_gradient_norm: 5.0
   batch_size: 128
   coverage: True
+  max_len: 15
 
 train:
   learning_rate: 0.01
-  num_epochs: 10
+  num_epochs: 1
 
 infer:
-  infer_mode: 'greedy' # beam_search
+  infer_mode: 'greedy' # greedy beam_search
   beam_width: 10
   length_penalty_weight: 1.0

@@ -2,5 +2,6 @@ experiment/
 other/
 temp/
 resource/
-data/novel/
+data/
+bak/
 __pycache__/

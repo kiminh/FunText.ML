@@ -1,10 +1,10 @@
 data:
   src_suffix: ".src"
   tgt_suffix: ".tgt"
-  data_prefix: "../data/letter/data"
-  predict_prefix: "../data/letter/predict"
-  embed_file: "../resource/letter_embedding_64.txt"
-  out_dir: "../experiment/letter/"
+  data_prefix: "../data/en_sort/data"
+  predict_prefix: "../data/en_sort/predict"
+  embed_file: "../resource/en_letter_embedding_64.txt"
+  out_dir: "../experiment/en_sort/"
   
 model:
   encoder_type: 'bi' # uni | bi
@@ -19,7 +19,7 @@ model:
 
 train:
   learning_rate: 0.01
-  num_epochs: 1
+  num_epochs: 10
 
 infer:
   infer_mode: 'greedy' # greedy beam_search
