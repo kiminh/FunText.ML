@@ -41,10 +41,7 @@ class DataLoader():
              tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None])))
         dataset = dataset.map(_parse)
         if scope == 'train':
-            dataset = dataset.shuffle(buffer_size=10000)            
-            dataset = dataset.repeat(None)
-        else:            
-            dataset = dataset.repeat(1)
+            dataset = dataset.shuffle(buffer_size=10000)
         iterator = dataset.make_one_shot_iterator()
         features, labels = iterator.get_next()
         return features, labels
