@@ -10,7 +10,7 @@ class DataLoader(AttentionDataLoader):
     def __init__(self):
         super(DataLoader,self).__init__() 
             
-    def get_batch(self, src, tgt):
+    def get_batch(self, src, tgt, scope='train'):
         def _parse(src, src_len, src_oovs, max_src_oovs_len, tgt_in, tgt_out, tgt_len):
             return {"source": src, 
                     "source_sequence_length": src_len,
@@ -26,6 +26,8 @@ class DataLoader(AttentionDataLoader):
             (tf.TensorShape([None, None]), tf.TensorShape([None]), tf.TensorShape([None, None]), tf.TensorShape(None), 
              tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None])))
         dataset = dataset.map(_parse)
+        if scope == 'train':
+            dataset = dataset.shuffle(buffer_size=10000)
         iterator = dataset.make_one_shot_iterator()
         features, labels = iterator.get_next()
         return features, labels

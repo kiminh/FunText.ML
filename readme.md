@@ -14,6 +14,7 @@
 代码: 
 * [https://github.com/lspvic/CopyNet](https://github.com/lspvic/CopyNet)
 * [https://github.com/xueyouluo/my_seq2seq](https://github.com/xueyouluo/my_seq2seq)
+* [https://github.com/YinpeiDai/Seq2Seq-Models](https://github.com/YinpeiDai/Seq2Seq-Models)
 
 ## seq2seq + attention
 

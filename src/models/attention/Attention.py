@@ -14,7 +14,7 @@ class Attention():
 
     def train(self):
         train_input_fn = lambda: self._dl.get_batch(self._dl.X_train, self._dl.y_train)
-        test_input_fn = lambda: self._dl.get_batch(self._dl.X_test, self._dl.y_test)
+        test_input_fn = lambda: self._dl.get_batch(self._dl.X_test, self._dl.y_test,scope='test')
         
         estimator = tf.estimator.Estimator(self._g.model_fn, model_dir=Config.data.out_dir+"checkpoint")
         

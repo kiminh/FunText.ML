@@ -26,7 +26,7 @@ class DataLoader():
         y = tgt_data.split('\n')
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.2)
             
-    def get_batch(self, src, tgt):
+    def get_batch(self, src, tgt, scope='train'):
         def _parse(src, src_len, tgt_in, tgt_out, tgt_len):
             return {"source": src, 
                     "source_sequence_length": src_len}, {
@@ -40,6 +40,8 @@ class DataLoader():
             (tf.TensorShape([None, None]), tf.TensorShape([None]), 
              tf.TensorShape([None, None]), tf.TensorShape([None, None]), tf.TensorShape([None])))
         dataset = dataset.map(_parse)
+        if scope == 'train':
+            dataset = dataset.shuffle(buffer_size=10000)
         iterator = dataset.make_one_shot_iterator()
         features, labels = iterator.get_next()
         return features, labels
