@@ -91,8 +91,8 @@ class Generator(AttentionGenerator):
     
     def _init_embeddings(self):
         with tf.variable_scope("embeddings", dtype=self._dtype):
-            self._embedding = tf.get_variable(name='embedding_share', shape=[self._vocab_size, Config.model.embed_dim], dtype=tf.float32)
-
+            # self._embedding = tf.get_variable(name='embedding_share', shape=[self._vocab_size, Config.model.embed_dim], dtype=tf.float32)
+            self._embedding = tf.get_variable('embedding_share', [self._vocab_size, Config.model.embed_dim], trainable=True, initializer=tf.constant_initializer(self.dl.word_embs))
             self._encoder_emb_inp = tf.nn.embedding_lookup(
                 params=self._embedding,
                 ids=tf.where(condition=tf.less(self._source, self._vocab_size),

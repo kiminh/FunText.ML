@@ -16,7 +16,8 @@ def build_map(words):
     word2idx = {word: idx for idx, word in idx2word.items()}
     return idx2word, word2idx
             
-def load_embed(embed_file):
+def load_embed(embed_file):    
+    vecs = []
     words = []
     is_first_line = True
     with open(embed_file, 'r', encoding='utf-8') as f:
@@ -26,8 +27,11 @@ def load_embed(embed_file):
                 is_first_line = False
                 continue
             word = tokens[0]
+            vec = list(map(float, tokens[1:]))
+            vecs.append(vec)
             words.append(word)
-    return words
+    word_embs = np.array(vecs, dtype=np.float32)
+    return words,word_embs
 
 def select_by_score(predictions):
     p_list = list(predictions)

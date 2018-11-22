@@ -16,7 +16,7 @@ class DataLoader():
     def _preprocess(self, src_data_file, tgt_data_file, embed_file):
         src_data = read_data(src_data_file)
         tgt_data = read_data(tgt_data_file)
-        words = load_embed(embed_file)
+        words,self.word_embs = load_embed(embed_file)
         self.idx2word, self.word2idx = build_map(words)
         self.vocab_size = len(self.word2idx)
         return src_data,tgt_data

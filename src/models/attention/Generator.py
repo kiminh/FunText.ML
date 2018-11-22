@@ -77,8 +77,8 @@ class Generator():
             
     def _init_embeddings(self):
         with tf.variable_scope("embeddings", dtype=self._dtype):
-            embedding = tf.get_variable("embedding_share", 
-                                    [self._vocab_size, Config.model.embed_dim], self._dtype)
+            # embedding = tf.get_variable("embedding_share", [self._vocab_size, Config.model.embed_dim], self._dtype)
+            embedding = tf.get_variable('embedding_share', [self._vocab_size, Config.model.embed_dim], trainable=True, initializer=tf.constant_initializer(self.dl.word_embs))
             self._embedding_encoder = embedding
             self._embedding_decoder = embedding
 
